@@ -4,6 +4,7 @@ truetype glyph loading with stb_truetyp
 
 ### outputs
 
+```
       11111111
      111111111
      1111 1111
@@ -34,3 +35,4 @@ linegap: 92
 advance: 3991
 l bearing: 132
 vertical: 10941
+```
