@@ -1,8 +1,7 @@
-#include <iostream>
-// #include <ft2build.h>
-// #include FT_FREETYPE_H
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 #include <stdlib.h>
 #include <map>
 
@@ -14,6 +13,32 @@ struct Glyph {
 	unsigned char* bitmap; // must be freed
 	unsigned int c;
 };
+
+#define MAXUNICODE	0x10FFFF
+
+int utf8_decode(const char *o) {
+    static const unsigned int limits[] = {0xFF, 0x7F, 0x7FF, 0xFFFF};
+    const unsigned char *s = (const unsigned char *)o;
+    unsigned int c = s[0];
+    unsigned int res = 0;  /* final result */
+    if (c < 0x80)  /* ascii? */
+        res = c;
+    else {
+        int count = 0;  /* to count number of continuation bytes */
+        while (c & 0x40) {  /* still have continuation bytes? */
+            int cc = s[++count];  /* read next byte */
+            if ((cc & 0xC0) != 0x80)  /* not a continuation byte? */
+                return -1;  /* invalid byte sequence */
+            res = (res << 6) | (cc & 0x3F);  /* add lower 6 bits from cont. byte */
+            c <<= 1;  /* to test next bit */
+        }
+        res |= ((c & 0x7F) << (count * 5));  /* add first byte */
+        if (count > 3 || res > MAXUNICODE || res <= limits[count])
+            return -1;  /* invalid byte sequence */
+        s += count;  /* skip continuation bytes read */
+    }
+    return res;
+}
 
 bool Open_New_Face(const char* filename, unsigned int index, stbtt_fontinfo* face) {
 	FILE* ttf;
@@ -78,75 +103,93 @@ void renderStr(const std::string& str, std::map<char, Glyph>& glyph_map) {
   }
 }
 
+// for signed distance field implementation reference:
+// http://www.codersnotes.com/notes/signed-distance-fields/
 int main() {
-	stbtt_fontinfo info;
-	if (!Open_New_Face("../res/CelestiaMediumRedux1.5.ttf", 0, &info)) {
-		printf("error");
-	}
-	float scale = stbtt_ScaleForPixelHeight(&info, 48.f);
-  std::map<char, Glyph> glyph_map;
-  LoadCharacters(&info, glyph_map, scale);
-  renderStr("Hello world", glyph_map);
-  // free
-  for (auto pair : glyph_map) {
-    free(pair.second.bitmap);
-  }
+//    stbtt_fontinfo info;
+//    if (!Open_New_Face("../res/CelestiaMediumRedux1.5.ttf", 0, &info)) {
+//        printf("error");
+//    }
+//    float scale = stbtt_ScaleForPixelHeight(&info, 48.f);
+//    std::map<char, Glyph> glyph_map;
+//    LoadCharacters(&info, glyph_map, scale);
+//    renderStr("Hello world", glyph_map);
+//    // free
+//    for (auto pair : glyph_map) {
+//        free(pair.second.bitmap);
+//    }
+//	return 0;
+/* load font file */
+    long size;
+    unsigned char* fontBuffer;
 
-//	printf("
-//	Character:%c\n
-//	Width: %d\n
-//	Height: %d\n
-//	left bearing: %d\n
-//	top bearing: %d\n
-//	ascender: %d\n
-//	descender: %d\n
-//	linegap: %d\n
-//	advance: %d\n
-//	bearing: %d\n
-//	vertical: %d",
-//		g.c, g.w, g.h, g.xoff, g.yoff, g.ascender, g.descender, g.linegap, g.advance, g.left_bearing, g.vertical);
+    FILE* fontFile = fopen("../res/CelestiaMediumRedux1.5.ttf", "rb");
+    fseek(fontFile, 0, SEEK_END);
+    size = ftell(fontFile); /* how long is the file ? */
+    fseek(fontFile, 0, SEEK_SET); /* reset */
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    fontBuffer = (unsigned char*)malloc(size);
 
-	//// FreeType
-	//FT_Library ft;
-	//// All functions return a value different than 0 whenever an error occurred
-	//if (FT_Init_FreeType(&ft))
-	//	std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+    fread(fontBuffer, size, 1, fontFile);
+    fclose(fontFile);
 
-	//// Load font as face
-	//FT_Face face;
-	//if (FT_New_Face(ft, "CelestiaMediumRedux1.5.ttf", 0, &face))
-	//	std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+    /* prepare font */
+    stbtt_fontinfo info;
+    if (!stbtt_InitFont(&info, fontBuffer, 0))
+    {
+        printf("failed\n");
+    }
 
-	//// Set size to load glyphs as
-	//FT_Set_Pixel_Sizes(face, 0, 15);
+    int b_w = 512; /* bitmap width */
+    int b_h = 128; /* bitmap height */
+    int l_h = 64; /* line height */
 
-	//unsigned int c = 'S';
-	//unsigned int c2 = 'T';
-	//// Load character glyph 
-	//if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-	//{
-	//	std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-	//}
+    /* create a bitmap for the phrase */
+    unsigned char* bitmap = (unsigned char*)malloc(b_w * b_h);
 
-	//printf("freetype result:\n");
-	//printf("Width: %d\nHeight: %d\nAdvance: %d\nBearingX: %d\nBearingY: %d\n",
-	//	face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->advance.x, 
-	//	face->glyph->bitmap_left, face->glyph->bitmap_top);
+    /* calculate font scaling */
+    float scale = stbtt_ScaleForPixelHeight(&info, l_h);
 
-	//for(unsigned int i = 0; i < face->glyph->bitmap.rows; i++)
-	//{
-	//	for(unsigned int x = 0; x < face->glyph->bitmap.width; x++)
-	//	{
-	//		printf("%c", face->glyph->bitmap.buffer[x+i*face->glyph->bitmap.width]>>5 ? '1' : ' ');
-	//	}
-	//	printf("\n");
-	//}
+    char* word = "how are you forks??";
 
-	//// Destroy FreeType once we're finished
-	//FT_Done_Face(face);
-	//FT_Done_FreeType(ft);
+    int x = 0;
 
-	return 0;
+    int ascent, descent, lineGap;
+    stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
+
+    ascent *= scale;
+    descent *= scale;
+
+    int i;
+    for (i = 0; i < strlen(word); ++i)
+    {
+        /* get bounding box for character (may be offset to account for chars that dip above or below the line */
+        int c_x1, c_y1, c_x2, c_y2;
+        stbtt_GetCodepointBitmapBox(&info, word[i], scale, scale, &c_x1, &c_y1, &c_x2, &c_y2);
+
+        /* compute y (different characters have different heights */
+        int y = ascent + c_y1;
+
+        /* render character (stride and offset is important here) */
+        int byteOffset = x + (y  * b_w);
+        stbtt_MakeCodepointBitmap(&info, bitmap + byteOffset, c_x2 - c_x1, c_y2 - c_y1, b_w, scale, scale, word[i]);
+
+        /* how wide is this character */
+        int ax;
+        stbtt_GetCodepointHMetrics(&info, word[i], &ax, 0);
+        x += ax * scale;
+
+        /* add kerning */
+        int kern;
+        kern = stbtt_GetCodepointKernAdvance(&info, word[i], word[i + 1]);
+        x += kern * scale;
+    }
+
+    /* save out a 1 channel image */
+    stbi_write_png("out.png", b_w, b_h, 1, bitmap, b_w);
+
+    free(fontBuffer);
+    free(bitmap);
+
+    return 0;
 }
