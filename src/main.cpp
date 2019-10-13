@@ -4,13 +4,14 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 #include <stdlib.h>
+#include <map>
 
 struct Glyph {
 	int w, h, xoff, yoff;
 	int advance, left_bearing;
 	int ascender, descender, linegap;
 	int vertical;
-	unsigned char* bitmap;
+	unsigned char* bitmap; // must be freed
 	unsigned int c;
 };
 
@@ -44,25 +45,66 @@ Glyph Load_Char(stbtt_fontinfo* face, unsigned int ch, float scale) {
 	return glyph;
 }
 
+void LoadCharacters(stbtt_fontinfo* face, std::map<char, Glyph>& char_map, float scale) {
+  // A ~ Z
+  for (int i = 65; i <= 90; i++) {
+    Glyph g = Load_Char(face, i, scale);
+    char_map.insert(std::make_pair(i, g));
+  }
+
+  // a ~ z
+  for (int i = 97; i <= 122; i++) {
+    Glyph g = Load_Char(face, i, scale);
+    char_map.insert(std::make_pair(i, g));
+  }
+}
+
+void renderChar(const Glyph& g) {
+  for(int i = 0; i < g.h; i++) {
+    for(int x = 0; x < g.w; x++) {
+      printf("%c", g.bitmap[x+i*g.w]>>5 ? 'x' : ' ');
+    }
+    printf("\n");
+  }
+}
+
+void renderStr(const std::string& str, std::map<char, Glyph>& glyph_map) {
+  for (auto ch : str) {
+    if (glyph_map.find(ch) == glyph_map.end()) {
+      continue;
+    }
+    Glyph g = glyph_map[ch];
+    renderChar(g);
+  }
+}
+
 int main() {
 	stbtt_fontinfo info;
 	if (!Open_New_Face("../res/CelestiaMediumRedux1.5.ttf", 0, &info)) {
 		printf("error");
 	}
 	float scale = stbtt_ScaleForPixelHeight(&info, 48.f);
-	Glyph g = Load_Char(&info, 'A', scale);
+  std::map<char, Glyph> glyph_map;
+  LoadCharacters(&info, glyph_map, scale);
+  renderStr("Hello world", glyph_map);
+  // free
+  for (auto pair : glyph_map) {
+    free(pair.second.bitmap);
+  }
 
-	for(int i = 0; i < g.h; i++)
-	{
-		for(int x = 0; x < g.w; x++)
-		{
-			printf("%c", g.bitmap[x+i*g.w]>>5 ? '1' : ' ');
-		}
-		printf("\n");
-	}
-
-	printf("Character:%c\nWidth: %d\nHeight: %d\nleft bearing: %d\ntop bearing: %d\nascender: %d\ndescender: %d\nlinegap: %d\nadvance: %d\nl bearing: %d\nvertical: %d",
-		g.c, g.w, g.h, g.xoff, g.yoff, g.ascender, g.descender, g.linegap, g.advance, g.left_bearing, g.vertical);
+//	printf("
+//	Character:%c\n
+//	Width: %d\n
+//	Height: %d\n
+//	left bearing: %d\n
+//	top bearing: %d\n
+//	ascender: %d\n
+//	descender: %d\n
+//	linegap: %d\n
+//	advance: %d\n
+//	bearing: %d\n
+//	vertical: %d",
+//		g.c, g.w, g.h, g.xoff, g.yoff, g.ascender, g.descender, g.linegap, g.advance, g.left_bearing, g.vertical);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
