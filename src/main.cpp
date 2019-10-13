@@ -1,9 +1,9 @@
 #include <iostream>
-#include <stdlib.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
+// #include <ft2build.h>
+// #include FT_FREETYPE_H
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
+#include <stdlib.h>
 
 struct Glyph {
 	int w, h, xoff, yoff;
@@ -46,7 +46,7 @@ Glyph Load_Char(stbtt_fontinfo* face, unsigned int ch, float scale) {
 
 int main() {
 	stbtt_fontinfo info;
-	if (!Open_New_Face("CelestiaMediumRedux1.5.ttf", 0, &info)) {
+	if (!Open_New_Face("../res/CelestiaMediumRedux1.5.ttf", 0, &info)) {
 		printf("error");
 	}
 	float scale = stbtt_ScaleForPixelHeight(&info, 48.f);
@@ -105,8 +105,6 @@ int main() {
 	//// Destroy FreeType once we're finished
 	//FT_Done_Face(face);
 	//FT_Done_FreeType(ft);
-
-	getchar();
 
 	return 0;
 }

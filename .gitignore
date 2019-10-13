@@ -1,0 +1,11 @@
+# exclude all files and folders
+/*
+
+# add exception
+!/.gitignore
+!/CMakeLists.txt
+!/README.md
+!/third_party/
+!/src/
+!/res/
+!/test/
