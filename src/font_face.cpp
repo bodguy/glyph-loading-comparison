@@ -8,7 +8,8 @@
 #include "stb_image_write.h"
 #include "font_face.h"
 #include "glyph.h"
-#include <stdlib.h>
+#include <cstdlib>
+#include <cmath>
 
 font_face::font_face() : face_index(0) {
     face = (stbtt_fontinfo*)malloc(sizeof(stbtt_fontinfo));
@@ -45,35 +46,14 @@ bool font_face::load_glyph(const char codepoint, int font_size, int sdf_scale) {
     glyph new_glyph;
     internal_load_glyph(&new_glyph, glyph_index);
     new_glyph.charcode = codepoint;
-//  stbi_write_png("out.png", new_glyph.bmp.width, new_glyph.bmp.height, 1, &new_glyph.bmp.data[0], new_glyph.bmp.width);
-
-    const int final_x_pad = std::sqrt(font_size);
-    const int final_y_pad = std::sqrt(font_size);
-    const int master_x_pad = final_x_pad * 2;
-    const int master_y_pad =final_y_pad * 2;
-
-    if (sdf_scale != 1) {
-        int x_pad = master_x_pad * sdf_scale;
-        int y_pad = master_y_pad * sdf_scale;
-
-        bitmap<double> sdf_bmp(new_glyph.bmp.width + x_pad * 2, new_glyph.bmp.height + y_pad * 2, 0.0);
-
-        for (int y = 0; y < new_glyph.bmp.height; y++) {
-            for (int x = 0; x < new_glyph.bmp.width; x++) {
-                sdf_bmp.set(x + x_pad, y + y_pad, new_glyph.bmp.get(x, y) / 255.0);
-            }
-        }
-
-        // signed distance field
-        // here
-    }
+    stbi_write_png("out.png", new_glyph.bmp.width, new_glyph.bmp.height, 1, &new_glyph.bmp.data[0], new_glyph.bmp.width);
 
     return true;
 }
 
 void font_face::internal_load_glyph(glyph* glyph, int glyph_index) {
-    float scale_x = 1.f, scale_y = 1.f; // TODO
-    unsigned char* buf = stbtt_GetGlyphBitmapSubpixel(face, scale_x, scale_y, 0.f, 0.f, glyph_index, &glyph->bmp.width, &glyph->bmp.height, nullptr, nullptr);
+    float scale_y = 1.f; // TODO
+    unsigned char* buf = stbtt_GetGlyphBitmapSubpixel(face, 0.f, scale_y, 0.f, 0.f, glyph_index, &glyph->bmp.width, &glyph->bmp.height, nullptr, nullptr);
     bitmap<unsigned char> bmp(glyph->bmp.width, glyph->bmp.height, (unsigned char)0);
 
     // copy with inverted y
