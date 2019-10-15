@@ -123,7 +123,7 @@ int main() {
         fprintf(stderr, "error to open ttf file");
         return -1;
     }
-    result = loader.load_glyph('A', 0, 16);
+    result = loader.load_glyph('A', 48.f);
     if (!result) {
         fprintf(stderr, "error to load glyph");
         return -1;

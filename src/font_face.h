@@ -14,6 +14,7 @@
 // https://learnopengl.com/In-Practice/Text-Rendering
 // https://github.com/justinmeiners/stb-truetype-example/blob/master/main.c
 // https://gist.github.com/matthewjberger/464281d2e9101d13f0c8e931948a2f4b
+// https://fontdrop.info/
 struct stbtt_fontinfo;
 struct glyph;
 class font_face {
@@ -22,14 +23,16 @@ public:
     ~font_face();
 
     bool open_new_face(const std::string& filename, unsigned int index);
-    bool load_glyph(const char codepoint, int font_size, int sdf_scale);
+    bool load_glyph(const char codepoint, float font_size);
 
 private:
-    void internal_load_glyph(glyph* glyph, int glyph_index);
+    void load_glyph_bitmap(glyph* glyph, int glyph_index, float pixels);
+    void load_glyph_metrics(glyph* glyph, int glyph_index);
 
 private:
     stbtt_fontinfo* face;
     unsigned int face_index;
+    int ascent, descent, line_gap;
 };
 
 

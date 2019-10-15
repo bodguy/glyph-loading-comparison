@@ -10,20 +10,22 @@
 #include <map>
 
 struct glyph {
-    uint32_t charcode; // UTF-32
-    float bbox_width, bbox_hight;
-    float bearing_x, bearing_y;
-    float advance_x;
+    int bbox_width, bbox_hight;
+    int left_side_bearing, right_side_bearing, up_side_bearing;
+    int advance_width;
     bitmap<unsigned char> bmp;
-    std::map<uint32_t, float> kernings;
-    float s0, t0, s1, t1;
+    std::map<uint32_t, int> kernings;
 
     void scale(float factor) {
-        advance_x *= factor;
-        bearing_x *= factor;
-        bearing_y *= factor;
         bbox_width *= factor;
         bbox_hight *= factor;
+        left_side_bearing *= factor;
+        right_side_bearing *= factor;
+        up_side_bearing *= factor;
+        advance_width *= factor; // have to
+        for (auto& p : kernings) { // have to
+            p.second *= factor; // TODO: work?
+        }
     }
 };
 
