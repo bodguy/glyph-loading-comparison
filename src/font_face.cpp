@@ -45,12 +45,28 @@ bool font_face::load_glyph(const char codepoint, float font_size) {
 
     glyph new_glyph;
     load_glyph_bitmap(&new_glyph, glyph_index, font_size);
-//    stbi_write_png("out.png", new_glyph.bmp.width, new_glyph.bmp.height, 1, &new_glyph.bmp.data[0], new_glyph.bmp.width);
+//    stbi_write_png("out.png", new_glyph.bmp.width, new_glyph.bmp.height, 1, new_glyph.bmp.data.data(), new_glyph.bmp.width);
+
+    printf("codepoint: %d\nglyph_idnex: %d\nbitmap_width: %d\nbitmap_height: %d\nbbox_width: %d\nbbox_height: %d\nleft_side_bearing: %d\nright_side_bearing: %d\nup_side_bearing: %d\nadvance_width: %d\nascent: %d\ndescent: %d\nline_gap: %d\n",
+           codepoint,
+           glyph_index,
+           new_glyph.bmp.width,
+           new_glyph.bmp.height,
+           new_glyph.bbox_width,
+           new_glyph.bbox_height,
+           new_glyph.left_side_bearing,
+           new_glyph.right_side_bearing,
+           new_glyph.up_side_bearing,
+           new_glyph.advance_width,
+           ascent,
+           descent,
+           line_gap);
 
     return true;
 }
 
 void font_face::load_glyph_bitmap(glyph* glyph, int glyph_index, float pixels) {
+    // 16px 1em 12pt
     float scale = stbtt_ScaleForPixelHeight(face, pixels);
     unsigned char* buf = stbtt_GetGlyphBitmapSubpixel(face, scale, scale, 0.f, 0.f, glyph_index, &glyph->bmp.width, &glyph->bmp.height, nullptr, nullptr);
     bitmap<unsigned char> bmp(glyph->bmp.width, glyph->bmp.height, (unsigned char)0);
@@ -76,6 +92,6 @@ void font_face::load_glyph_metrics(glyph* glyph, int glyph_index) {
     int xMin, yMin, xMax, yMax;
     stbtt_GetGlyphBox(face, glyph_index, &xMin, &yMin, &xMax, &yMax); // good
     glyph->bbox_width = xMax - xMin;
-    glyph->bbox_hight = yMax - yMin;
+    glyph->bbox_height = yMax - yMin;
     glyph->right_side_bearing = glyph->advance_width - glyph->left_side_bearing - glyph->bbox_width; // good
 }

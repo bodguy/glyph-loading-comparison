@@ -1,4 +1,5 @@
 #include "font_face.h"
+#include "freetype_face.h"
 
 //struct Glyph {
 //	int w, h, xoff, yoff;
@@ -117,15 +118,22 @@ int main() {
 //	return 0;
 /* load font file */
 
-    font_face loader;
-    bool result = loader.open_new_face("../res/arial.ttf", 0);
-    if (!result) {
-        fprintf(stderr, "error to open ttf file");
-        return -1;
-    }
-    result = loader.load_glyph('A', 48.f);
-    if (!result) {
-        fprintf(stderr, "error to load glyph");
-        return -1;
-    }
+  // stbtt version
+  font_face loader;
+  bool result = loader.open_new_face("../res/arial.ttf", 0);
+  if (!result) {
+      fprintf(stderr, "error to open ttf file");
+      return -1;
+  }
+  result = loader.load_glyph('A', 11.f);
+  if (!result) {
+      fprintf(stderr, "error to load glyph");
+      return -1;
+  }
+
+  printf("\n");
+
+  // freetype version
+  freetype_face ff;
+  ff.load("../res/arial.ttf", 0);
 }

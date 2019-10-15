@@ -10,7 +10,7 @@
 #include <map>
 
 struct glyph {
-    int bbox_width, bbox_hight;
+    int bbox_width, bbox_height;
     int left_side_bearing, right_side_bearing, up_side_bearing;
     int advance_width;
     bitmap<unsigned char> bmp;
@@ -18,7 +18,7 @@ struct glyph {
 
     void scale(float factor) {
         bbox_width *= factor;
-        bbox_hight *= factor;
+        bbox_height *= factor;
         left_side_bearing *= factor;
         right_side_bearing *= factor;
         up_side_bearing *= factor;
