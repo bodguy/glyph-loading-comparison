@@ -9,6 +9,7 @@ if(NOT FREETYPE_FOUND)
 endif(NOT FREETYPE_FOUND)
 
 set(THIRD_PARTY_DIR "third_party/" ${FREETYPE_INCLUDE_DIRS})
-add_executable(${CMAKE_PROJECT_NAME} src/main.cpp src/bitmap.h src/glyph.h src/font_face.cpp src/font_face.h src/freetype_face.h src/freetype_face.cpp)
+file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h")
+add_executable(${CMAKE_PROJECT_NAME} ${SRC_FILES})
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${THIRD_PARTY_DIR})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${FREETYPE_LIBRARY})

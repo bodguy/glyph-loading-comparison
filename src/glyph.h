@@ -6,27 +6,25 @@
 #define GLYPH_LOADING_GLYPH_H
 
 #include "bitmap.h"
-#include <stdint.h>
 #include <map>
 
-struct glyph {
-    int bbox_width, bbox_height;
-    int left_side_bearing, right_side_bearing, up_side_bearing;
-    int advance_width;
-    bitmap<unsigned char> bmp;
-    std::map<uint32_t, int> kernings;
+template<typename T>
+struct vec2 {
+  T x, y;
+};
 
-    void scale(float factor) {
-        bbox_width *= factor;
-        bbox_height *= factor;
-        left_side_bearing *= factor;
-        right_side_bearing *= factor;
-        up_side_bearing *= factor;
-        advance_width *= factor; // have to
-        for (auto& p : kernings) { // have to
-            p.second *= factor; // TODO: work?
-        }
-    }
+struct glyph_info {
+  vec2<int> size;
+  vec2<int> bearing;
+  int advance;
+  bitmap<unsigned char> bitmap;
+  std::map<uint32_t , int> kerning;
+};
+
+struct font_info {
+  int pixel_height;
+  int ascender, descender;
+  int line_gap;
 };
 
 #endif //GLYPH_LOADING_GLYPH_H
