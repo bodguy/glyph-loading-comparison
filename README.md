@@ -2,6 +2,14 @@
 
 truetype glyph loading with stb_truetyp 
 
+### linux env
+
+for using freetype, install it.
+
+```bash
+sudo apt-get install libfreetype6-dev
+```
+
 ### outputs
 
 ```

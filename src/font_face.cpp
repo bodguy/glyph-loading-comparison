@@ -47,7 +47,7 @@ bool font_face::load_glyph(const char codepoint, float font_size) {
     load_glyph_bitmap(&new_glyph, glyph_index, font_size);
 //    stbi_write_png("out.png", new_glyph.bmp.width, new_glyph.bmp.height, 1, new_glyph.bmp.data.data(), new_glyph.bmp.width);
 
-    printf("codepoint: %d\nglyph_idnex: %d\nbitmap_width: %d\nbitmap_height: %d\nbbox_width: %d\nbbox_height: %d\nleft_side_bearing: %d\nright_side_bearing: %d\nup_side_bearing: %d\nadvance_width: %d\nascent: %d\ndescent: %d\nline_gap: %d\n",
+    printf("codepoint: %d (good)\nglyph_index: %d (good)\nbitmap_width: %d (good)\nbitmap_height: %d (good)\nbbox_width: %d (good)\nbbox_height: %d (good)\nleft_side_bearing: %d (good)\nright_side_bearing: %d\nup_side_bearing: %d\nadvance_width: %d (good)\nascent: %d (good)\ndescent: %d (good)\nline_gap: %d (good)\n",
            codepoint,
            glyph_index,
            new_glyph.bmp.width,
@@ -68,6 +68,7 @@ bool font_face::load_glyph(const char codepoint, float font_size) {
 void font_face::load_glyph_bitmap(glyph* glyph, int glyph_index, float pixels) {
     // 16px 1em 12pt
     float scale = stbtt_ScaleForPixelHeight(face, pixels);
+    printf("scale: %f\n", scale);
     unsigned char* buf = stbtt_GetGlyphBitmapSubpixel(face, scale, scale, 0.f, 0.f, glyph_index, &glyph->bmp.width, &glyph->bmp.height, nullptr, nullptr);
     bitmap<unsigned char> bmp(glyph->bmp.width, glyph->bmp.height, (unsigned char)0);
 
