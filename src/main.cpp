@@ -12,14 +12,16 @@
 // https://fontdrop.info/
 
 int main() {
+  int pixel_height = 36;
+
   stb_font ff;
-  ff.open_new_face("../res/arial.ttf", 0);
+  ff.init_font("../res/arial.ttf", 0);
   glyph_info gi;
-  ff.load_glyph(&gi, 'A', 11);
+  ff.load_glyph(&gi, 'A', pixel_height);
   printf("stb_tt :\n");
   ff.print_info(gi);
 
-  freetype_font ftf("../res/arial.ttf", 11);
+  freetype_font ftf("../res/arial.ttf", pixel_height);
   glyph_info gi2;
   ftf.load_glyph('A');
   ftf.render_glyph_and_get_info(&gi2);

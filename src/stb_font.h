@@ -25,7 +25,7 @@ struct stb_font {
     free(info);
   }
 
-  bool open_new_face(const std::string& filename, unsigned int index) {
+  bool init_font(const std::string& filename, unsigned int index) {
     FILE* fp = fopen(filename.c_str(), "rb");
     if (!fp) return false;
 
@@ -39,6 +39,9 @@ struct stb_font {
 
     if (!stbtt_InitFont(face, buffer, index)) return false;
     stbtt_GetFontVMetrics(face, &info->ascender, &info->descender, &info->line_gap);
+    info->ascender = FT_CEIL(info->ascender);
+    info->descender = FT_CEIL(info->descender);
+    info->line_gap = FT_CEIL(info->line_gap);
 
     return true;
   }
@@ -55,33 +58,25 @@ struct stb_font {
     return true;
   }
 
-  void load_glyph_bitmap(glyph_info* glyph, int glyph_index, int pixel_height) {
+  void load_glyph_bitmap(glyph_info* out_glyph_info, int glyph_index, int pixel_height) {
     float scale = stbtt_ScaleForPixelHeight(face, pixel_height);
-    unsigned char* buf = stbtt_GetGlyphBitmapSubpixel(face, scale, scale, 0.f, 0.f, glyph_index, &glyph->size.x, &glyph->size.y, nullptr, nullptr);
-    bitmap<unsigned char> bmp(glyph->size.x, glyph->size.y, (unsigned char)0);
+    unsigned char* buf = stbtt_GetGlyphBitmapSubpixel(face, scale, scale, 0.f, 0.f, glyph_index, &out_glyph_info->size.x, &out_glyph_info->size.y, nullptr, nullptr);
+    bitmap<unsigned char> bmp(out_glyph_info->size.x, out_glyph_info->size.y, (unsigned char)0);
 
     // copy from bottom-top to top-bottom (reverse)
-    for (int y = 0; y < glyph->size.y; y++) {
-      for (int x = 0; x < glyph->size.x; x++) {
-        int inverted_y = (glyph->size.y - 1) - y;
-        unsigned char buf_byte = buf[x + inverted_y * glyph->size.x];
+    for (int y = 0; y < out_glyph_info->size.y; y++) {
+      for (int x = 0; x < out_glyph_info->size.x; x++) {
+        int inverted_y = (out_glyph_info->size.y - 1) - y;
+        unsigned char buf_byte = buf[x + inverted_y * out_glyph_info->size.x];
         bmp.set(x, y, buf_byte);
       }
     }
 
     free(buf);
-    glyph->bitmap = bmp;
-    stbtt_GetGlyphBitmapBox(face, glyph_index, scale, scale, nullptr, &glyph->bearing.y, nullptr, nullptr); // ???
-    glyph->bearing.y = -glyph->bearing.y;
-    load_glyph_metrics(glyph, glyph_index);
-  }
-
-  void load_glyph_metrics(glyph_info* glyph, int glyph_index) {
-    stbtt_GetGlyphHMetrics(face, glyph_index, &glyph->advance, &glyph->bearing.x); // good
-    int xMin, yMin, xMax, yMax;
-//    stbtt_GetGlyphBox(face, glyph_index, &xMin, &yMin, &xMax, &yMax); // good
-//    glyph->bbox_width = xMax - xMin;
-//    glyph->bbox_height = yMax - yMin;
+    out_glyph_info->bitmap = bmp;
+    stbtt_GetGlyphBitmapBox(face, glyph_index, scale, scale, nullptr, &out_glyph_info->bearing.y, nullptr, nullptr);
+    stbtt_GetGlyphHMetrics(face, glyph_index, &out_glyph_info->advance, &out_glyph_info->bearing.x);
+    out_glyph_info->advance = FT_CEIL(out_glyph_info->advance);
   }
 
   void print_info(const glyph_info& ginfo) {

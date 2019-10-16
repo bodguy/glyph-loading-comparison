@@ -8,6 +8,8 @@
 #include "bitmap.h"
 #include <map>
 
+#define FT_CEIL(X)  (((X + 63) & -64) / 64)
+
 template<typename T>
 struct vec2 {
   T x, y;
@@ -18,7 +20,7 @@ struct glyph_info {
   vec2<int> bearing;
   int advance;
   bitmap<unsigned char> bitmap;
-  std::map<uint32_t , int> kerning;
+  std::map<uint32_t, int> kerning;
 };
 
 struct font_info {

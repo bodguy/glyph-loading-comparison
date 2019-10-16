@@ -46,9 +46,9 @@ struct freetype_font {
     FT_Request_Size(face, &req);
     FT_Size_Metrics metrics = face->size->metrics;
     info.pixel_height = pixel_height;
-    info.ascender = metrics.ascender;
-    info.descender = metrics.descender;
-    info.line_gap = metrics.height - metrics.ascender + metrics.descender;
+    info.ascender = FT_CEIL(metrics.ascender);
+    info.descender = FT_CEIL(metrics.descender);
+    info.line_gap = FT_CEIL(metrics.height - metrics.ascender + metrics.descender);
   }
 
   const FT_Glyph_Metrics* load_glyph(uint32_t codepoint) {
@@ -70,7 +70,7 @@ struct freetype_font {
     out_glyph_info->size.y = ft_bitmap->rows;
     out_glyph_info->bearing.x = slot->bitmap_left;
     out_glyph_info->bearing.y = -slot->bitmap_top;
-    out_glyph_info->advance = slot->advance.x;
+    out_glyph_info->advance = FT_CEIL(slot->advance.x);
 
     bitmap<unsigned char> bmp(ft_bitmap->width, ft_bitmap->rows, (unsigned char)0);
 
