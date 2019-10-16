@@ -14,17 +14,15 @@
 int main() {
   int pixel_height = 1024;
 
-  stb_font ff;
-  ff.init_font("../res/arial.ttf", 0);
+  stb_font ff("../res/arial.ttf", 0, pixel_height);
   glyph_info gi;
-  ff.load_glyph(&gi, 'A', pixel_height);
+  ff.load_glyph(&gi, 'A');
   printf("stb_tt :\n");
   ff.print_info(gi);
 
-  freetype_font ftf("../res/arial.ttf", pixel_height);
+  freetype_font ftf("../res/arial.ttf", 0, pixel_height);
   glyph_info gi2;
-  ftf.load_glyph('A');
-  ftf.render_glyph_and_get_info(&gi2);
+  ftf.load_glyph(&gi2, 'A');
   printf("\nFreeType :\n");
   ftf.print_info(gi2);
 }

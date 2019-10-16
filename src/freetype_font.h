@@ -11,14 +11,14 @@
 #include <cstdlib>
 
 struct freetype_font {
-  freetype_font(const char* filename, int pixel_size) { init_font(filename, pixel_size); }
+  freetype_font(const char* filename, unsigned int index, int pixel_size) { init_font(filename, index, pixel_size); }
   ~freetype_font() { close_font(); }
 
-  bool init_font(const char* filename, int pixel_size) {
+  bool init_font(const char* filename, unsigned int index, int pixel_size) {
     FT_Error error = FT_Init_FreeType(&ft);
     if (error) return false;
     memset(&info, 0, sizeof(info));
-    FT_New_Face(ft, filename, 0, &face);
+    FT_New_Face(ft, filename, index, &face);
     set_pixel_height(pixel_size);
     info.ascender = face->ascender;
     info.descender = face->descender;
@@ -51,19 +51,15 @@ struct freetype_font {
     info.pixel_height = pixel_height;
   }
 
-  const FT_Glyph_Metrics* load_glyph(uint32_t codepoint) {
+  bool load_glyph(glyph_info* out_glyph_info, uint32_t codepoint) {
     uint32_t glyph_index = FT_Get_Char_Index(face, codepoint);
-    if (glyph_index == 0) return nullptr;
+    if (glyph_index == 0) return false;
     FT_Error error = FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL);
-    if (error) return nullptr;
+    if (error) return false;
     FT_GlyphSlot slot = face->glyph;
     assert(slot->format == FT_GLYPH_FORMAT_OUTLINE);
-    return &slot->metrics;
-  }
 
-  bool render_glyph_and_get_info(glyph_info* out_glyph_info) {
-    FT_GlyphSlot slot = face->glyph;
-    FT_Error error = FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
+    error = FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
     if (error) return false;
     FT_Bitmap* ft_bitmap = &slot->bitmap;
     out_glyph_info->size.x = ft_bitmap->width;
@@ -80,11 +76,11 @@ struct freetype_font {
 
     // copy from bottom-top to top-bottom (reverse)
     for (int y = 0; y < ft_bitmap->rows; y++) {
-      for (int x = 0; x < ft_bitmap->width; x++) {
-        int inverted_y = (out_glyph_info->size.y - 1) - y;
-        unsigned char buf_byte = ft_bitmap->buffer[x + inverted_y * ft_bitmap->pitch];
-        bmp.set(x, y, buf_byte);
-      }
+        for (int x = 0; x < ft_bitmap->width; x++) {
+            int inverted_y = (out_glyph_info->size.y - 1) - y;
+            unsigned char buf_byte = ft_bitmap->buffer[x + inverted_y * ft_bitmap->pitch];
+            bmp.set(x, y, buf_byte);
+        }
     }
     out_glyph_info->bitmap = bmp;
     stbi_write_png("freetype_output.png", out_glyph_info->size.x, out_glyph_info->size.y, 1, out_glyph_info->bitmap.data.data(), out_glyph_info->size.x);
