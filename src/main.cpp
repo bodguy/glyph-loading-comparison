@@ -12,7 +12,7 @@
 // https://fontdrop.info/
 
 int main() {
-  int pixel_height = 36;
+  int pixel_height = 1024;
 
   stb_font ff;
   ff.init_font("../res/arial.ttf", 0);

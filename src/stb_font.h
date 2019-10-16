@@ -12,6 +12,7 @@
 #include "stb_font.h"
 #include "glyph.h"
 #include <cstdlib>
+#include <cmath>
 #include <string>
 
 struct stb_font {
@@ -39,9 +40,9 @@ struct stb_font {
 
     if (!stbtt_InitFont(face, buffer, index)) return false;
     stbtt_GetFontVMetrics(face, &info->ascender, &info->descender, &info->line_gap);
-    info->ascender = FT_CEIL(info->ascender);
-    info->descender = FT_CEIL(info->descender);
-    info->line_gap = FT_CEIL(info->line_gap);
+    info->ascender = info->ascender;
+    info->descender = info->descender;
+    info->line_gap = info->line_gap;
 
     return true;
   }
@@ -52,6 +53,7 @@ struct stb_font {
       return false;
     }
     info->pixel_height = pixel_height;
+
     load_glyph_bitmap(out_glyph_info, glyph_index, pixel_height);
     stbi_write_png("stb_tt_output.png", out_glyph_info->size.x, out_glyph_info->size.y, 1, out_glyph_info->bitmap.data.data(), out_glyph_info->size.x);
 
@@ -61,6 +63,11 @@ struct stb_font {
   void load_glyph_bitmap(glyph_info* out_glyph_info, int glyph_index, int pixel_height) {
     float scale = stbtt_ScaleForPixelHeight(face, pixel_height);
     unsigned char* buf = stbtt_GetGlyphBitmapSubpixel(face, scale, scale, 0.f, 0.f, glyph_index, &out_glyph_info->size.x, &out_glyph_info->size.y, nullptr, nullptr);
+    float ascender, descender, line_gap;
+    stbtt_GetScaledFontVMetrics(face->data, 0, pixel_height, &ascender, &descender, &line_gap);
+    out_glyph_info->ascender = (int)std::ceilf(ascender);
+    out_glyph_info->descender = (int)std::ceilf(descender);
+    out_glyph_info->line_gap = (int)std::ceilf(line_gap);
     bitmap<unsigned char> bmp(out_glyph_info->size.x, out_glyph_info->size.y, (unsigned char)0);
 
     // copy from bottom-top to top-bottom (reverse)
@@ -76,11 +83,12 @@ struct stb_font {
     out_glyph_info->bitmap = bmp;
     stbtt_GetGlyphBitmapBox(face, glyph_index, scale, scale, nullptr, &out_glyph_info->bearing.y, nullptr, nullptr);
     stbtt_GetGlyphHMetrics(face, glyph_index, &out_glyph_info->advance, &out_glyph_info->bearing.x);
-    out_glyph_info->advance = FT_CEIL(out_glyph_info->advance);
+    out_glyph_info->advance = (int)std::ceilf(out_glyph_info->advance * scale);
   }
 
-  void print_info(const glyph_info& ginfo) {
-    printf("w: %d\nh: %d\nbearing-x: %d\nbearing-y: %d\nadvance: %d\n", ginfo.size.x, ginfo.size.y, ginfo.bearing.x, ginfo.bearing.y, ginfo.advance);
+  void print_info(const glyph_info& glyph_info) {
+    printf("w: %d\nh: %d\nbearing-x: %d\nbearing-y: %d\nadvance: %d\nscaled_asc: %d\nscaled_desc: %d\nscaled_line_gap: %d\n",
+            glyph_info.size.x, glyph_info.size.y, glyph_info.bearing.x, glyph_info.bearing.y, glyph_info.advance, glyph_info.ascender, glyph_info.descender, glyph_info.line_gap);
     printf("asc: %d\ndesc: %d\nline_gap: %d\npixel_height: %d\n", info->ascender, info->descender, info->line_gap, info->pixel_height);
   }
 

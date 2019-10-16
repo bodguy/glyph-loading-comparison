@@ -20,6 +20,9 @@ struct freetype_font {
     memset(&info, 0, sizeof(info));
     FT_New_Face(ft, filename, 0, &face);
     set_pixel_height(pixel_size);
+    info.ascender = face->ascender;
+    info.descender = face->descender;
+    info.line_gap = face->height - face->ascender + face->descender;
 
     return true;
   }
@@ -39,16 +42,13 @@ struct freetype_font {
   void set_pixel_height(int pixel_height) {
     FT_Size_RequestRec req;
     req.type = FT_SIZE_REQUEST_TYPE_REAL_DIM;
-    req.width = 0;
-    req.height = (uint32_t)pixel_height * 64;
+    req.width = 0; // omit then equal to height value.
+    req.height = (uint32_t)pixel_height << 6; // pixel_height is pixel size, so convert to point size (26.6 fixed floating point)
+    // dpi, if 0 then 72dpi is default.
     req.horiResolution = 0;
     req.vertResolution = 0;
     FT_Request_Size(face, &req);
-    FT_Size_Metrics metrics = face->size->metrics;
     info.pixel_height = pixel_height;
-    info.ascender = FT_CEIL(metrics.ascender);
-    info.descender = FT_CEIL(metrics.descender);
-    info.line_gap = FT_CEIL(metrics.height - metrics.ascender + metrics.descender);
   }
 
   const FT_Glyph_Metrics* load_glyph(uint32_t codepoint) {
@@ -71,6 +71,10 @@ struct freetype_font {
     out_glyph_info->bearing.x = slot->bitmap_left;
     out_glyph_info->bearing.y = -slot->bitmap_top;
     out_glyph_info->advance = FT_CEIL(slot->advance.x);
+    FT_Size_Metrics metrics = face->size->metrics;
+    out_glyph_info->ascender = FT_CEIL(metrics.ascender);
+    out_glyph_info->descender = FT_CEIL(metrics.descender);
+    out_glyph_info->line_gap = FT_CEIL(metrics.height - metrics.ascender + metrics.descender);
 
     bitmap<unsigned char> bmp(ft_bitmap->width, ft_bitmap->rows, (unsigned char)0);
 
@@ -89,7 +93,8 @@ struct freetype_font {
   }
 
   void print_info(const glyph_info& glyph_info) {
-    printf("w: %d\nh: %d\nbearing-x: %d\nbearing-y: %d\nadvance: %d\n", glyph_info.size.x, glyph_info.size.y, glyph_info.bearing.x, glyph_info.bearing.y, glyph_info.advance);
+    printf("w: %d\nh: %d\nbearing-x: %d\nbearing-y: %d\nadvance: %d\nscaled_asc: %d\nscaled_desc: %d\nscaled_line_gap: %d\n",
+            glyph_info.size.x, glyph_info.size.y, glyph_info.bearing.x, glyph_info.bearing.y, glyph_info.advance, glyph_info.ascender, glyph_info.descender, glyph_info.line_gap);
     printf("asc: %d\ndesc: %d\nline_gap: %d\npixel_height: %d\n", info.ascender, info.descender, info.line_gap, info.pixel_height);
   }
 

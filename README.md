@@ -14,26 +14,32 @@ sudo apt-get install libfreetype6-dev
 
 ```
 stb_tt :
-w: 23
-h: 24
+w: 615
+h: 657
 bearing-x: -3
-bearing-y: -24
-advance: 22
-asc: 29
-desc: -6
-line_gap: 2
-pixel_height: 36
+bearing-y: -657
+advance: 612
+scaled_asc: 830
+scaled_desc: -194
+scaled_line_gap: 30
+asc: 1854
+desc: -434
+line_gap: 67
+pixel_height: 1024
 
 FreeType :
-w: 23
-h: 23
-bearing-x: -1
-bearing-y: -23
-advance: 21
-asc: 30
-desc: -7
-line_gap: 0
-pixel_height: 36
+w: 615
+h: 657
+bearing-x: -2
+bearing-y: -657
+advance: 612
+scaled_asc: 830
+scaled_desc: -195
+scaled_line_gap: 29
+asc: 1854
+desc: -434
+line_gap: 67
+pixel_height: 1024
 ```
 
 freetype_output.png, stb_tt_output.png file is dropped on executable directory.
