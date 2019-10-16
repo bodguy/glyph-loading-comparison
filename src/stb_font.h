@@ -5,24 +5,32 @@
 #ifndef GLYPH_LOADING_STB_FONT_H
 #define GLYPH_LOADING_STB_FONT_H
 
+#include "glyph.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
-#include "stb_font.h"
-#include "glyph.h"
 #include <cstdlib>
 #include <cmath>
+#include <map>
 
 struct stb_font {
-  stb_font(const char* filename, unsigned int index, int pixel_height) {
-    init_font(filename, index, pixel_height);
-  }
-
+  stb_font() {}
   ~stb_font() {
-    free(face);
-    free(info);
-    free(buffer);
+    if (face) {
+      free(face);
+      face = nullptr;
+    }
+
+    if (info) {
+      free(info);
+      info = nullptr;
+    }
+
+    if (buffer) {
+      free(buffer);
+      buffer = nullptr;
+    }
   }
 
   bool init_font(const char* filename, unsigned int index, int pixel_height) {
@@ -96,6 +104,7 @@ struct stb_font {
   stbtt_fontinfo* face;
   font_info* info;
   unsigned char* buffer;
+  std::map<uint32_t, glyph_info*> glyph_map;
 };
 
 

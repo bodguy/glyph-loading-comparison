@@ -5,14 +5,25 @@
 #ifndef GLYPH_LOADING_FREETYPE_FONT_H
 #define GLYPH_LOADING_FREETYPE_FONT_H
 
+#include "glyph.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "glyph.h"
 #include <cstdlib>
+#include <map>
 
 struct freetype_font {
-  freetype_font(const char* filename, unsigned int index, int pixel_size) { init_font(filename, index, pixel_size); }
-  ~freetype_font() { close_font(); }
+  freetype_font() {}
+  ~freetype_font() {
+    if (face) {
+      FT_Done_Face(face);
+      face = nullptr;
+    }
+
+    if (ft) {
+      FT_Done_FreeType(ft);
+      ft = nullptr;
+    }
+  }
 
   bool init_font(const char* filename, unsigned int index, int pixel_size) {
     FT_Error error = FT_Init_FreeType(&ft);
@@ -25,18 +36,6 @@ struct freetype_font {
     info.line_gap = face->height - face->ascender + face->descender;
 
     return true;
-  }
-
-  void close_font() {
-    if (face) {
-      FT_Done_Face(face);
-      face = nullptr;
-    }
-
-    if (ft) {
-      FT_Done_FreeType(ft);
-      ft = nullptr;
-    }
   }
 
   void set_pixel_height(int pixel_height) {
@@ -97,6 +96,7 @@ struct freetype_font {
   font_info info;
   FT_Face face;
   FT_Library ft;
+  std::map<uint32_t, glyph_info*> glyph_map;
 };
 
 #endif //GLYPH_LOADING_FREETYPE_FONT_H
