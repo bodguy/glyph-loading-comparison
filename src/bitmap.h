@@ -6,12 +6,15 @@
 #define GLYPH_LOADING_BITMAP_H
 
 #include <vector>
+#include <cassert>
 
 template<typename T>
 class bitmap {
 public:
     bitmap();
     bitmap(int w, int h, T val);
+
+    bitmap<T>& operator=(const bitmap<T>& other);
 
     void clear(int w, int h, T val);
     int get_idx(const int x, const int y) const;
@@ -29,14 +32,22 @@ bitmap<T>::bitmap() :width(0), height(0), data() {
 }
 
 template <typename T>
-bitmap<T>::bitmap(int w, int h, T val) :width(w), height(h), data() {
+bitmap<T>::bitmap(int w, int h, T val) : data() {
     clear(w, h, val);
+}
+
+template <typename T>
+bitmap<T>& bitmap<T>::operator=(bitmap<T> const& other) {
+  replace_part(other, 0, 0);
+  return *this;
 }
 
 template <typename T>
 void bitmap<T>::clear(int w, int h, T val) {
     data.resize(w*h);
     std::fill(data.begin(), data.end(), val);
+    width = w;
+    height = h;
 }
 
 template <typename T>

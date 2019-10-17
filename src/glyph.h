@@ -16,6 +16,7 @@ struct vec2 {
 };
 
 struct glyph_info {
+  glyph_info() : bitmap() { }
   vec2<int> size;
   vec2<int> bearing;
   int advance;

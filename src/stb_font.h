@@ -31,6 +31,12 @@ struct stb_font {
       free(buffer);
       buffer = nullptr;
     }
+
+    for (auto& p : glyph_map) {
+      delete(p.second);
+      p.second = nullptr;
+    }
+    glyph_map.clear();
   }
 
   bool init_font(const char* filename, unsigned int index, int pixel_height) {
@@ -57,14 +63,13 @@ struct stb_font {
     return true;
   }
 
-  bool load_glyph(glyph_info* out_glyph_info, uint32_t codepoint) {
+  bool load_glyph(uint32_t codepoint) {
     int glyph_index = stbtt_FindGlyphIndex(face, codepoint);
-    if (glyph_index == 0) {
-      return false;
-    }
+    if (glyph_index == 0) return false;
 
+    glyph_info* out_glyph_info = new glyph_info();
     load_glyph_bitmap(out_glyph_info, glyph_index);
-    stbi_write_png("stb_tt_output.png", out_glyph_info->size.x, out_glyph_info->size.y, 1, out_glyph_info->bitmap.data.data(), out_glyph_info->size.x);
+    glyph_map.insert(std::make_pair(codepoint, out_glyph_info));
 
     return true;
   }
@@ -87,18 +92,27 @@ struct stb_font {
         bmp.set(x, y, buf_byte);
       }
     }
-
     free(buf);
+    out_glyph_info->bitmap.clear(bmp.width, bmp.height, 0);
     out_glyph_info->bitmap = bmp;
     stbtt_GetGlyphBitmapBox(face, glyph_index, scale, scale, nullptr, &out_glyph_info->bearing.y, nullptr, nullptr);
     stbtt_GetGlyphHMetrics(face, glyph_index, &out_glyph_info->advance, &out_glyph_info->bearing.x);
     out_glyph_info->advance = (int)std::ceil(out_glyph_info->advance * scale);
   }
 
-  void print_info(const glyph_info& glyph_info) {
-    printf("w: %d\nh: %d\nbearing-x: %d\nbearing-y: %d\nadvance: %d\nscaled_asc: %d\nscaled_desc: %d\nscaled_line_gap: %d\n",
-            glyph_info.size.x, glyph_info.size.y, glyph_info.bearing.x, glyph_info.bearing.y, glyph_info.advance, glyph_info.ascender, glyph_info.descender, glyph_info.line_gap);
-    printf("asc: %d\ndesc: %d\nline_gap: %d\npixel_height: %d\n", info->ascender, info->descender, info->line_gap, info->pixel_height);
+  void print_info(uint32_t codepoint) {
+    if (glyph_map.find(codepoint) != glyph_map.end()) {
+      glyph_info* gi = glyph_map[codepoint];
+      printf("========= stb_tt :\n");
+      printf("w: %d\nh: %d\nbearing-x: %d\nbearing-y: %d\nadvance: %d\nscaled_asc: %d\nscaled_desc: %d\nscaled_line_gap: %d\n",
+             gi->size.x, gi->size.y, gi->bearing.x, gi->bearing.y, gi->advance, gi->ascender, gi->descender, gi->line_gap);
+      printf("asc: %d\ndesc: %d\nline_gap: %d\npixel_height: %d\n", info->ascender, info->descender, info->line_gap, info->pixel_height);
+      // print out to file
+      std::string output_filename = "stbtt_output_" + std::to_string(codepoint) + ".png";
+      stbi_write_png(output_filename.c_str(), gi->size.x, gi->size.y, 1, gi->bitmap.data.data(), gi->size.x);
+    } else {
+      printf("not found codepoint: %d", codepoint);
+    }
   }
 
   stbtt_fontinfo* face;

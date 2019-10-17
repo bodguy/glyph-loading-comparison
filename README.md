@@ -1,8 +1,9 @@
 ### glyph-loading
 
-truetype glyph loading with stb_truetyp 
+brief comparision with stb_truetype and freetype.  
+THIS IS NOT A PRODUCTION LEVEL CODE.
 
-### linux env
+### debian distro
 
 for using freetype, install it.
 
@@ -10,10 +11,34 @@ for using freetype, install it.
 sudo apt-get install libfreetype6-dev
 ```
 
+### vagrant
+
+vagrant test pass
+
+### simple code
+
+```c++
+int main() {
+  int pixel_height = 1024;
+
+  stb_font ff;
+  ff.init_font("../res/arial.ttf", 0, pixel_height);
+  ff.load_glyph('A');
+  ff.print_info('A');
+
+  freetype_font ftf;
+  ftf.init_font("../res/arial.ttf", 0, pixel_height);
+  ftf.load_glyph('A');
+  ftf.print_info('A');
+}
+```
+
 ### outputs
 
+glyph bitmap images are dropped on executable directory.
+
 ```
-stb_tt :
+========= stb_tt :
 w: 615
 h: 657
 bearing-x: -3
@@ -26,8 +51,7 @@ asc: 1854
 desc: -434
 line_gap: 67
 pixel_height: 1024
-
-FreeType :
+========= FreeType :
 w: 615
 h: 657
 bearing-x: -2
@@ -42,4 +66,7 @@ line_gap: 67
 pixel_height: 1024
 ```
 
-freetype_output.png, stb_tt_output.png file is dropped on executable directory.
+- stb_truetype output
+![stb_truetype](./stbtt_output_65.png)   
+- freetype output
+![freetype](./freetype_output_65.png)
