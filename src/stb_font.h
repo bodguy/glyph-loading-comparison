@@ -53,7 +53,7 @@ struct stb_font {
 
     face = (stbtt_fontinfo*)malloc(sizeof(stbtt_fontinfo));
     info = (font_info*)malloc(sizeof(font_info));
-    if (!stbtt_InitFont(face, buffer, index)) return false;
+    if (!stbtt_InitFont(face, buffer, stbtt_GetFontOffsetForIndex(buffer,index))) return false;
     stbtt_GetFontVMetrics(face, &info->ascender, &info->descender, &info->line_gap);
     info->ascender = info->ascender;
     info->descender = info->descender;
