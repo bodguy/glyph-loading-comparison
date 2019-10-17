@@ -81,19 +81,16 @@ struct freetype_font {
     out_glyph_info->ascender = FT_CEIL(metrics.ascender);
     out_glyph_info->descender = FT_CEIL(metrics.descender);
     out_glyph_info->line_gap = FT_CEIL(metrics.height - metrics.ascender + metrics.descender);
-
-    bitmap<unsigned char> bmp(ft_bitmap->width, ft_bitmap->rows, (unsigned char)0);
+    out_glyph_info->bitmap.clear(ft_bitmap->width, ft_bitmap->rows, (unsigned char)0);
 
     // copy from bottom-top to top-bottom (reverse)
     for (int y = 0; y < ft_bitmap->rows; y++) {
         for (int x = 0; x < ft_bitmap->width; x++) {
             int inverted_y = (out_glyph_info->size.y - 1) - y;
             unsigned char buf_byte = ft_bitmap->buffer[x + inverted_y * ft_bitmap->pitch];
-            bmp.set(x, y, buf_byte);
+            out_glyph_info->bitmap.set(x, y, buf_byte);
         }
     }
-    out_glyph_info->bitmap.clear(bmp.width, bmp.height, 0);
-    out_glyph_info->bitmap = bmp;
     glyph_map.insert(std::make_pair(codepoint, out_glyph_info));
 
     return true;

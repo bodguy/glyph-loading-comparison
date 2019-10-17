@@ -28,9 +28,9 @@ int utf8_decode(const char *o) {
 }
 
 int main() {
-  const char* font_file = "../res/YuGothR.ttc";
-  int pixel_height = 512;
-  char* codepoint = "み";
+  const char* font_file = "../res/NanumGothicCoding.ttf";
+  int pixel_height = 48;
+  char* codepoint = "푸";
   int cp = utf8_decode(codepoint);
 
   stb_font ff;

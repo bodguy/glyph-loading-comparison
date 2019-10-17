@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <map>
+#include <string>
 
 struct stb_font {
   stb_font() {}
@@ -82,19 +83,17 @@ struct stb_font {
     out_glyph_info->ascender = (int)std::ceil(ascender);
     out_glyph_info->descender = (int)std::ceil(descender);
     out_glyph_info->line_gap = (int)std::ceil(line_gap);
-    bitmap<unsigned char> bmp(out_glyph_info->size.x, out_glyph_info->size.y, (unsigned char)0);
+    out_glyph_info->bitmap.clear(out_glyph_info->size.x, out_glyph_info->size.y, (unsigned char)0);
 
     // copy from bottom-top to top-bottom (reverse)
     for (int y = 0; y < out_glyph_info->size.y; y++) {
       for (int x = 0; x < out_glyph_info->size.x; x++) {
         int inverted_y = (out_glyph_info->size.y - 1) - y;
         unsigned char buf_byte = buf[x + inverted_y * out_glyph_info->size.x];
-        bmp.set(x, y, buf_byte);
+        out_glyph_info->bitmap.set(x, y, buf_byte);
       }
     }
     free(buf);
-    out_glyph_info->bitmap.clear(bmp.width, bmp.height, 0);
-    out_glyph_info->bitmap = bmp;
     stbtt_GetGlyphBitmapBox(face, glyph_index, scale, scale, nullptr, &out_glyph_info->bearing.y, nullptr, nullptr);
     stbtt_GetGlyphHMetrics(face, glyph_index, &out_glyph_info->advance, &out_glyph_info->bearing.x);
     out_glyph_info->bearing.x = (int)std::ceil(out_glyph_info->bearing.x * scale);

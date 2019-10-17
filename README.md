@@ -76,7 +76,6 @@ pixel_height: 1024
 
 ### TODO
 
-- bitmap copy ellision
 - kerning
 - rect packing (skyline)
 - containing opengl texture info (uv coordinates)
