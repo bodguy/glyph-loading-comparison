@@ -38,8 +38,8 @@ int utf8_decode(const char *o) {
 
 int main() {
   const char* font_file = "../res/HMKMMAG.TTF";
-  int pixel_height = 1024;
-  char* codepoint = "ㅃ";
+  int pixel_height = 512;
+  char* codepoint = "ㅖ";
   int cp = utf8_decode(codepoint);
 
   stb_font ff;

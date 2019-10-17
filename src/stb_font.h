@@ -97,6 +97,7 @@ struct stb_font {
     out_glyph_info->bitmap = bmp;
     stbtt_GetGlyphBitmapBox(face, glyph_index, scale, scale, nullptr, &out_glyph_info->bearing.y, nullptr, nullptr);
     stbtt_GetGlyphHMetrics(face, glyph_index, &out_glyph_info->advance, &out_glyph_info->bearing.x);
+    out_glyph_info->bearing.x = (int)std::ceil(out_glyph_info->bearing.x * scale);
     out_glyph_info->advance = (int)std::ceil(out_glyph_info->advance * scale);
   }
 
