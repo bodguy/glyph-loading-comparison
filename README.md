@@ -67,6 +67,9 @@ pixel_height: 1024
 ```
 
 - stb_truetype output
-![stb_truetype](./stbtt_output_65.png)   
+
+![stb_truetype](./stbtt_output_65.png)
+
 - freetype output
+  
 ![freetype](./freetype_output_65.png)
