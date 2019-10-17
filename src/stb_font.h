@@ -111,7 +111,7 @@ struct stb_font {
       std::string output_filename = "stbtt_output_" + std::to_string(codepoint) + ".png";
       stbi_write_png(output_filename.c_str(), gi->size.x, gi->size.y, 1, gi->bitmap.data.data(), gi->size.x);
     } else {
-      printf("not found codepoint: %d", codepoint);
+      printf("not found codepoint: %d\n", codepoint);
     }
   }
 

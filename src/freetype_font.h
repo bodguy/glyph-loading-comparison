@@ -36,7 +36,10 @@ struct freetype_font {
     FT_Error error = FT_Init_FreeType(&ft);
     if (error) return false;
     memset(&info, 0, sizeof(info));
-    FT_New_Face(ft, filename, index, &face);
+    error = FT_New_Face(ft, filename, index, &face);
+    if (error) return false;
+    error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
+    if (error) return false;
     set_pixel_height(pixel_size);
     info.ascender = face->ascender;
     info.descender = face->descender;
@@ -107,7 +110,7 @@ struct freetype_font {
       std::string output_filename = "freetype_output_" + std::to_string(codepoint) + ".png";
       stbi_write_png(output_filename.c_str(), gi->size.x, gi->size.y, 1, gi->bitmap.data.data(), gi->size.x);
     } else {
-      printf("not found codepoint: %d", codepoint);
+      printf("not found codepoint: %d\n", codepoint);
     }
   }
 
