@@ -73,3 +73,15 @@ pixel_height: 1024
 - freetype output
   
 ![freetype](./freetype_output_65.png)
+
+### TODO
+
+- bitmap copy ellision
+- kerning
+- rect packing (skyline)
+- containing opengl texture info (uv coordinates)
+- multi face support (just one font object can hold multiple face index info)
+- dynamic font (load only used glyph info), not using rect packing.
+- SDF (signed distance field) font loader
+
+
